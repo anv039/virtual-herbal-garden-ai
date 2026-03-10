@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Herbal Garden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.4/tiny-slider.css">
+    
+    <!-- VVV MODIFICATION VVV: Added Mol* 3D Viewer Library -->
+    <link rel="stylesheet" type="text/css" href="https://molstar.org/viewer/molstar.css" />
+    <script type="text/javascript" src="https://molstar.org/viewer/molstar.js"></script>
+
+    <style>
+        /* --- All CSS rules remain exactly the same. No changes here. --- */
+         :root {
+             --primary-color: #3B82F6; --secondary-color: #14B8A6; --light-accent: #BFDBFE;
+             --bg-accent: #EFF6FF; --text-dark: #1F2937; --text-light: #6B7280;
+             --background-light: #F9FAFB; --white: #ffffff; --border-color: #D1D5DB;
+             --error-color: #EF4444; --loading-color: #3B82F6; --shadow-color: rgba(0, 0, 0, 0.05);
+             --shadow-medium: rgba(0, 0, 0, 0.1); --header-bg: #2c3e50;
+         }
+         body { font-family: 'Nunito Sans', sans-serif; line-height: 1.7; margin: 0; background-color: var(--background-light); color: var(--text-dark); }
+         h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+         .main-welcome h2 { font-size: 2.2em; color: var(--primary-color); margin-bottom: 0.5em; text-align: center; padding-top: 20px; }
+         .section-title { font-size: 2em; color: var(--primary-color); margin-bottom: 25px; text-align: left; padding-left: 30px; }
+         h3 { font-size: 1.6em; color: var(--secondary-color); border-bottom: 2px solid var(--light-accent); padding-bottom: 8px; margin-top: 35px; margin-bottom: 15px;}
+         h4 { font-size: 1.1em; margin: 10px 0 5px 0; color: var(--primary-color);}
+         p { margin-bottom: 1em; color: var(--text-light); }
+         ul { padding-left: 25px; margin-bottom: 1em; }
+         li { margin-bottom: 0.5em; color: var(--text-light);}
+         strong { font-weight: 700; color: var(--text-dark); }
+         em { font-style: italic; }
+         a { color: var(--primary-color); text-decoration: none; transition: color 0.3s ease;}
+         a:hover { color: var(--secondary-color); }
+         header { background-color: var(--header-bg); color: var(--white); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px var(--shadow-medium); position: sticky; top: 0; z-index: 100; }
+         .header-left { display: flex; align-items: center;}
+         .header-left h1 { font-size: 1.6em; color: var(--white); margin: 0; margin-left: 10px; }
+         .logo { width: 40px; height: 40px; background-color: var(--secondary-color); border-radius: 50%; }
+         .header-right { display: flex; align-items: center; }
+         .search-container { display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 5px 5px 5px 15px; margin-right: 20px; }
+         #search-input { background: none; border: none; color: var(--white); padding: 8px 10px; font-size: 0.95em; outline: none; width: 200px; transition: width 0.3s ease; }
+         #search-input::placeholder { color: rgba(255, 255, 255, 0.7); }
+         #search-input:focus { width: 280px; }
+         #search-button { background-color: var(--primary-color); border: none; color: var(--white); border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-left: 5px; transition: background-color 0.3s ease; }
+         #search-button:hover { background-color: var(--secondary-color); }
+         #search-button svg { width: 16px; height: 16px; fill: currentColor; }
+         .user-actions button { color: var(--white); margin-left: 10px; font-weight: 700; font-size: 0.9em; padding: 8px 15px; border-radius: 20px; transition: background-color 0.3s ease; background: none; border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; font-family: 'Nunito Sans', sans-serif; }
+         .user-actions button:hover { background-color: rgba(255, 255, 255, 0.1); }
+         main { padding-top: 20px; }
+         .main-welcome { text-align: center; margin-bottom: 30px; padding: 0 20px; display: block; }
+         .main-welcome p { font-size: 1.1em; color: var(--text-light); max-width: 700px; margin-left: auto; margin-right: auto; }
+         #search-results-message { margin-top: 0; padding: 10px 20px; font-weight: bold; min-height: 40px; display: flex; justify-content: center; align-items: center; text-align: center; }
+         .error-message { color: var(--error-color); }
+         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--loading-color); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; margin: 0 auto; }
+         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+         .content-section { max-width: 1100px; margin: 30px auto; padding: 25px 30px; background-color: var(--white); border-radius: 12px; box-shadow: 0 2px 8px var(--shadow-color); }
+         #featured-plants { padding: 25px 0; background-color: transparent; box-shadow: none; margin-bottom: 0; display: block; }
+         #featured-plants .section-title { margin-bottom: 25px; }
+         .slider-container { position: relative; padding: 0 20px; }
+         #plant-slider-container .plant-slide { background-color: var(--white); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px var(--shadow-color); text-align: center; padding-bottom: 15px; margin: 5px 10px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid var(--border-color); }
+         #plant-slider-container .plant-slide:hover { transform: translateY(-5px); box-shadow: 0 6px 15px var(--shadow-medium); }
+         .plant-slide img { width: 100%; height: 200px; object-fit: cover; display: block; background-color: #e9ecef; border-bottom: 1px solid var(--border-color); }
+         .plant-slide h4 { margin-top: 15px; font-size: 1.2em; padding: 0 10px; }
+         .tns-controls button { position: absolute; top: 40%; transform: translateY(-50%); background-color: rgba(44, 62, 80, 0.6); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; z-index: 10; transition: background-color 0.3s ease; display: flex; align-items: center; justify-content: center; }
+         .tns-controls button:hover { background-color: rgba(44, 62, 80, 0.8); }
+         .tns-controls button:first-child { left: -5px; }
+         .tns-controls button:last-child { right: -5px; }
+         .tns-controls [disabled] { opacity: 0.3; cursor: default; display: none; }
+         #quotes-section { text-align: center; margin-top: 15px; display: block; }
+         #quotes-section h2 { margin-top: 0; display: none; }
+         #quotes-container { max-height: 200px; overflow-y: auto; margin-top: 0; padding: 5px 15px 5px 5px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--background-light); }
+         #quotes-container::-webkit-scrollbar { width: 10px; }
+         #quotes-container::-webkit-scrollbar-track { background: var(--bg-accent); border-radius: 5px;}
+         #quotes-container::-webkit-scrollbar-thumb { background: var(--light-accent); border-radius: 5px;}
+         #quotes-container::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+         #quotes-container blockquote { font-family: 'Playfair Display', serif; font-style: italic; color: var(--text-light); margin: 0 0 15px 0; padding: 15px 15px 15px 20px; border-left: 4px solid var(--secondary-color); font-size: 1.05em; background-color: var(--white); border-radius: 4px; box-shadow: 0 1px 3px var(--shadow-color); }
+         #quotes-container blockquote:last-child { margin-bottom: 5px; }
+         #quotes-container blockquote footer { background: none; margin-top: 8px; font-size: 0.9em; color: var(--text-light); text-align: right; padding: 0; }
+         #plant-details { padding: 30px 40px; margin: 30px auto; max-width: 960px; border-radius: 12px; background-color: var(--white); box-shadow: 0 4px 15px var(--shadow-medium); opacity: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; display: none; max-height: 0; overflow: hidden; }
+         #plant-details.visible { display: flex; opacity: 1; max-height: 10000px; flex-wrap: wrap; gap: 30px; }
+         .plant-image-container { flex: 1 1 300px; min-width: 250px; }
+         img.plant-image { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color); background-color: #e9ecef; display: block; margin: 0 auto; }
+         .plant-text-content { flex: 2 1 500px; }
+         .plant-text-content h2 { margin-top: 0; }
+         .plant-section { margin-bottom: 20px; padding-top: 15px; border-top: 1px solid var(--bg-accent); }
+         .plant-section:first-of-type { border-top: none; padding-top: 0; }
+         .plant-section p, .plant-section ul { color: var(--text-light); }
+         .dna-sequence { word-break: break-all; font-family: monospace; background-color: var(--bg-accent); padding: 10px; border-radius: 5px; max-height: 150px; overflow-y: auto; }
+         /* VVV MODIFICATION VVV: Added CSS for the 3D Viewer */
+         #molstar-container {
+             position: relative;
+             width: 100%;
+             height: 500px;
+             border: 1px solid var(--border-color);
+             border-radius: 8px;
+             margin-top: 15px;
+         }
+         footer { margin-top: 40px; padding: 20px 30px; font-size: 0.9em; background-color: var(--text-dark); color: #aaa; text-align: center; }
+         footer p { margin: 5px 0; color: #ccc;}
+         @media (max-width: 992px) { .search-container { margin-right: 10px;} #search-input { width: 150px; } #search-input:focus { width: 200px; } .user-actions button { padding: 6px 10px; font-size: 0.85em;} .tns-controls { display: none; } .main-welcome h2 {font-size: 2em;} .section-title {font-size: 1.8em;} }
+         @media (max-width: 768px) { header { padding: 10px 15px; flex-wrap: wrap; justify-content: center; } .header-left { order: 1; width: 100%; justify-content: center; margin-bottom: 10px;} .header-right { order: 2; width: 100%; justify-content: center; } .search-container { margin-right: 10px; flex-grow: 1; } #search-input { width: 100%; flex-grow: 1; } #search-input:focus { width: 100%; } .user-actions { margin-left: 10px; } .content-section, #plant-details, #quotes-section { margin-left: 15px; margin-right: 15px; padding: 20px;} #featured-plants { margin-left: 0; margin-right: 0;} #featured-plants .section-title { padding-left: 15px; } .slider-container { padding: 0 5px; } #plant-details { flex-direction: column; } .plant-image-container { margin-bottom: 20px; text-align: center;} img.plant-image { max-width: 350px; } .main-welcome h2 {font-size: 1.8em;} .section-title {font-size: 1.6em;} h3 { font-size: 1.3em; } #quotes-container { max-height: 150px;} }
+         /* Fix for plant list display */
+        #plant-slider-container {
+            display: block !important;
+        }
+
+        .plant-slide {
+            background-color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left"> <div class="logo"></div> <h1>Virtual Herbal Garden</h1> </div>
+        <div class="header-right">
+            <div class="search-container"> <input type="text" id="search-input" placeholder="Search by plant or by place name..." aria-label="Search for plants or places' name"> <button id="search-button" onclick="searchPlant()" aria-label="Search"> <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg> </button> </div>
+            <button id="location-search-btn" style="margin-right: 15px; background-color: var(--secondary-color); padding: 8px 15px; border-radius: 20px; border: none; color: white; cursor: pointer; font-weight: 700; font-size: 0.9em; font-family: 'Nunito Sans', sans-serif;">
+    🌍      Find Plants Near Me
+            </button>
+            <div class="user-actions"> <button onclick="alert('Login functionality coming soon!')">Login</button> <button onclick="alert('Sign Up functionality coming soon!')">Sign Up</button> </div>
+    </header>
+
+    <main>
+        <div id="main-welcome-area" class="main-welcome">
+             <h2>Welcome to the Garden</h2>
+             <p>Explore the healing power and natural beauty of herbs from around the world.</p>
+        </div>
+        <div id="search-results-message"> <div class="loader" id="loader"></div> </div>
+        <section id="featured-plants">
+            <h2 class="section-title">Discover These Herbs</h2>
+            <div class="slider-container">
+                 <div class="plant-slider-wrapper" id="plant-slider-container"></div>
+                 <div class="loader" id="featured-loader" style="display: block; margin: 30px auto;"></div>
+            </div>
+        </section>
+        <section id="location-results" class="content-section" style="display:none; max-width: 900px;">
+            <h2 class="section-title" id="location-results-title">Medicinal Plants in your area</h2>
+            <div id="location-results-list"></div>
+        </section>
+        <section id="quotes-section" class="content-section">
+             <div id="quotes-container">
+                 <blockquote>"The glory of gardening: hands in the dirt, head in the sun, heart with nature. To nurture a garden is to feed not just the body, but the soul."<footer>— Alfred Austin</footer></blockquote>
+                 <blockquote>"In every walk with nature, one receives far more than he seeks."<footer>— John Muir</footer></blockquote>
+                 <blockquote>"Adopt the pace of nature: her secret is patience."<footer>— Ralph Waldo Emerson</footer></blockquote>
+                 <blockquote>"The earth laughs in flowers."<footer>— Ralph Waldo Emerson</footer></blockquote>
+                 <blockquote>"Allow nature’s peace to flow into you as sunshine flows into trees."<footer>— John Muir</footer></blockquote>
+                 <blockquote>"Study nature, love nature, stay close to nature. It will never fail you."<footer>— Frank Lloyd Wright</footer></blockquote>
+                 <blockquote>"To forget how to dig the earth and to tend the soil is to forget ourselves."<footer>— Mahatma Gandhi</footer></blockquote>
+            </div>
+        </section>
+        <section id="plant-details" class="content-section"></section>
+    </main>
+
+    <footer>
+        <p>© 2025 Virtual Herbal Garden.</p>
+        <p>Plant data sourced locally. Images sourced via Pixabay API.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.2/min/tiny-slider.js"></script>
+
+    <script>
+        const DEFAULT_IMAGE_PATH = '/static/placeholder.png'; 
+
+        // DOM Elements
+        const searchLoader = document.getElementById('loader');
+        const featuredLoader = document.getElementById('featured-loader');
+        const resultsMessageContainer = document.getElementById('search-results-message');
+        const detailsContainer = document.getElementById('plant-details');
+        const featuredContainer = document.getElementById('featured-plants');
+        const plantSliderEl = document.getElementById('plant-slider-container');
+        const quotesContainer = document.getElementById('quotes-section');
+        const mainWelcomeContainer = document.getElementById('main-welcome-area');
+
+        let sliderInstance = null;
+        // VVV MODIFICATION VVV: Added instance variable for Mol*
+        let molstarInstance = null;
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', loadInitialPlants);
+
+        // VVV MODIFICATION VVV: Added the 3D viewer rendering function
+        async function renderProteinViewer(pdbId) {
+            const viewerSection = document.getElementById('protein-viewer-section');
+            if (!pdbId) {
+                if (viewerSection) viewerSection.style.display = 'none';
+                return;
+            }
+
+            viewerSection.style.display = 'block';
+            const viewerContainer = document.getElementById('molstar-container');
+            viewerContainer.innerHTML = ''; 
+
+            try {
+                // Fetch the data from our own server's proxy
+                const response = await fetch(`/get-pdb-data/${pdbId}`);
+                if (!response.ok) {
+                    throw new Error(`Proxy server failed with status: ${response.status}`);
+                }
+                const dataText = await response.text();
+
+                // Create the Mol* viewer instance
+                molstarInstance = await molstar.Viewer.create(viewerContainer, {
+                    layoutIsExpanded: false,
+                    layoutShowControls: false,
+                    viewportShowExpand: true,
+                });
+                
+                // Load the raw text data into the viewer and get a handle to it
+                const trajectory = await molstarInstance.loadStructureFromData(dataText, 'mmcif');
+
+                // Apply the default preset to create the visual representation and focus the camera
+                // CORRECT
+                await molstarInstance.plugin.managers.structure.component.applyPreset(trajectory, 'default');
+
+            } catch (e) {
+                console.error("A critical error occurred in renderProteinViewer:", e);
+                viewerContainer.innerHTML = '<p class="error-message">Could not load 3D model. Check console for details.</p>';
+            }
+        }
+
+        async function loadInitialPlants() {
+        featuredLoader.style.display = 'block';
+        plantSliderEl.innerHTML = '';
+        try {
+            const response = await fetch('http://127.0.0.1:5001/get-featured-plants');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            let featuredPlants = await response.json();
+
+            if (featuredPlants.length === 0) {
+                plantSliderEl.innerHTML = '<p style="text-align:center; padding: 20px;">Could not load featured plants.</p>';
+                return;
+            }
+
+            // Clear any previous slider content
+            plantSliderEl.style.display = '';
+            plantSliderEl.style.gridTemplateColumns = '';
+            plantSliderEl.style.gap = '';
+            plantSliderEl.style.padding = '';
+            plantSliderEl.innerHTML = '';
+
+            featuredPlants.forEach(plant => {
+                const title = plant.common_names && plant.common_names.length > 0 ? plant.common_names[0] : plant.scientific_name;
+                const imageSrc = plant.image || DEFAULT_IMAGE_PATH;
+
+                const slide = document.createElement('div');
+                slide.className = 'plant-slide';
+                slide.innerHTML = `
+                    <img src="${imageSrc}" alt="Image of ${title}" loading="lazy"
+                        onerror="this.onerror=null; this.src='${DEFAULT_IMAGE_PATH}';">
+                    <h4>${title || 'N/A'}</h4>
+                `;
+                
+                const searchTerm = title || plant.scientific_name;
+                if (searchTerm) {
+                    slide.onclick = () => {
+                        document.getElementById('search-input').value = searchTerm;
+                        searchPlant();
+                    };
+                } else {
+                    slide.style.cursor = 'default';
+                }
+                plantSliderEl.appendChild(slide);
+            });
+
+            if (sliderInstance) sliderInstance.destroy();
+            sliderInstance = tns({
+                container: '#plant-slider-container', items: 2, slideBy: 'page',
+                autoplay: true, autoplayTimeout: 4000, autoplayButtonOutput: false,
+                mouseDrag: true, controls: true, controlsText: ['‹', '›'],
+                nav: false, gutter: 15, loop: true,
+                responsive: {
+                    640: { items: 3, gutter: 20 }, 900: { items: 4, gutter: 25 },
+                    1200: { items: 5, gutter: 30}
+                }
+            });
+
+        } catch (error) {
+            console.error('Error loading featured plants:', error);
+            plantSliderEl.innerHTML = '<p class="error-message" style="text-align:center; padding: 20px;">Error loading data.</p>';
+        } finally {
+            featuredLoader.style.display = 'none';
+        }
+    }
+
+
+        async function searchPlant() {
+            const input = document.getElementById('search-input').value.trim();
+            resultsMessageContainer.innerHTML = '';
+            searchLoader.style.display = 'none';
+            detailsContainer.innerHTML = '';
+            detailsContainer.classList.remove('visible');
+            detailsContainer.style.maxHeight = '0';
+            detailsContainer.style.display = 'none';
+
+            // Show normal homepage sections
+            mainWelcomeContainer.style.display = 'block';
+            featuredContainer.style.display = 'block';
+            quotesContainer.style.display = 'block';
+
+            if (input === '') { return; }
+
+            // Show loader message
+            searchLoader.style.display = 'block';
+            resultsMessageContainer.appendChild(searchLoader);
+            // Hide welcome/featured/quotes while searching
+            mainWelcomeContainer.style.display = 'none';
+            featuredContainer.style.display = 'none';
+            quotesContainer.style.display = 'none';
+
+            try {
+                // 1. Try plant name search first (your existing behaviour)
+                const plantResponse = await fetch(`http://127.0.0.1:5001/search-plant?name=${encodeURIComponent(input)}`);
+                const plantData = await plantResponse.json();
+
+                if (plantResponse.ok) {
+                    // Found a plant by name → show full details
+                    searchLoader.style.display = 'none';
+                    resultsMessageContainer.innerHTML = '';
+                    displayPlantDetails(plantData);
+                    detailsContainer.style.display = 'flex';
+                    void detailsContainer.offsetWidth;
+                    detailsContainer.classList.add('visible');
+                    detailsContainer.style.maxHeight = '10000px';
+
+                    setTimeout(() => {
+                        detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                    return; // IMPORTANT: stop here, don't treat as location
+                }
+
+                // 2. Not found as plant name → treat input as LOCATION
+                searchLoader.style.display = 'none';
+                resultsMessageContainer.innerHTML = '';
+
+                // Use the NEW list-based location search path
+                await searchPlantsByLocation(input);
+
+            } catch (error) {
+                searchLoader.style.display = 'none';
+                console.error('Error in searchPlant():', error);
+                resultsMessageContainer.innerHTML = `<p class="error-message">${error.message}</p>`;
+                // Restore homepage sections
+                mainWelcomeContainer.style.display = 'block';
+                featuredContainer.style.display = 'block';
+                quotesContainer.style.display = 'block';
+            }
+        }
+
+        // VVV MODIFICATION VVV: Completely new display logic for the new dataset
+        function displayPlantDetails(plant) {
+              const generateList = (items) => {
+                  if (!items || !Array.isArray(items) || items.length === 0) return '';
+                  const validItems = items.filter(item => item && String(item).trim() !== '');
+                  if (validItems.length === 0) return '';
+                  return `<ul>${validItems.map(item => `<li>${item}</li>`).join('')}</ul>`;
+              };
+
+              const hasData = (obj) => obj && typeof obj === 'object' && Object.keys(obj).length > 0 && Object.values(obj).some(v => v && (Array.isArray(v) ? v.length > 0 : String(v).trim() !== ''));
+
+              const imageSrc = plant.image || DEFAULT_IMAGE_PATH;
+              const title = (plant.common_names && plant.common_names[0]) || plant.scientific_name;
+
+              detailsContainer.innerHTML = `
+                  <div class="plant-image-container">
+                      <img class="plant-image" src="${imageSrc}" alt="Image of ${title || 'the plant'}" onerror="this.onerror=null; this.src='${DEFAULT_IMAGE_PATH}';">
+                  </div>
+                  <div class="plant-text-content">
+                      <h2>${title || 'N/A'}</h2>
+                      
+                      <div class="plant-section">
+                          <p><strong>Scientific Name:</strong> <em>${plant.scientific_name || 'N/A'}</em></p>
+                          <p><strong>Common Names:</strong> ${(plant.common_names || []).join(', ') || 'N/A'}</p>
+                          <p><strong>Family:</strong> ${plant.family || 'N/A'}</p>
+                      </div>
+
+                      ${hasData(plant.description) ? `
+                      <h3>Description</h3>
+                      <div class="plant-section">
+                          <p>${plant.description?.appearance || 'N/A'}</p>
+                      </div>` : ''}
+
+                      ${hasData(plant.habitat_distribution) ? `
+                      <h3>Habitat & Distribution</h3>
+                      <div class="plant-section">
+                          <p><strong>Preferred Climate:</strong> ${plant.habitat_distribution?.preferred_climate || 'N/A'}</p>
+                          <p><strong>Soil Requirements:</strong> ${plant.habitat_distribution?.soil_requirements || 'N/A'}</p>
+                          <p><strong>Sunlight Needs:</strong> ${plant.habitat_distribution?.sunlight_needs || 'N/A'}</p>
+                      </div>` : ''}
+
+                      ${hasData(plant.medicinal_uses) ? `
+                      <h3>Medicinal Uses</h3>
+                      <div class="plant-section">
+                          ${plant.medicinal_uses?.therapeutic_properties ? `<h4>Therapeutic Properties:</h4> ${generateList(plant.medicinal_uses.therapeutic_properties)}` : ''}
+                          ${plant.medicinal_uses?.applications_in_ayush ? `<h4>Applications in Traditional Medicine:</h4> ${generateList(plant.medicinal_uses.applications_in_ayush)}` : ''}
+                          ${plant.medicinal_uses?.part_used ? `<h4>Part Used:</h4> ${generateList(plant.medicinal_uses.part_used)}` : ''}
+                          ${plant.medicinal_uses?.preparation_methods ? `<h4>Preparation Methods:</h4> ${generateList(plant.medicinal_uses.preparation_methods)}` : ''}
+                      </div>` : ''}
+                      
+                      ${hasData(plant.phytochemistry) ? `
+                      <h3>Phytochemistry</h3>
+                      <div class="plant-section">
+                          ${plant.phytochemistry?.active_compounds ? `<h4>Active Compounds:</h4> ${generateList(plant.phytochemistry.active_compounds)}` : ''}
+                          ${plant.phytochemistry?.health_benefits ? `<h4>Health Benefits (from scientific literature):</h4> ${generateList(plant.phytochemistry.health_benefits)}` : ''}
+                      </div>` : ''}
+
+                      ${hasData(plant.cultivation_details) ? `
+                      <h3>Cultivation Details</h3>
+                      <div class="plant-section">
+                          <p><strong>Propagation Methods:</strong> ${plant.cultivation_details?.propagation_methods || 'N/A'}</p>
+                          <p><strong>Pests & Diseases:</strong> ${plant.cultivation_details?.pests_diseases || 'N/A'}</p>
+                          <p><strong>Harvesting:</strong> ${plant.cultivation_details?.harvesting || 'N/A'}</p>
+                      </div>` : ''}
+                      
+                      ${hasData(plant.genetic_data) ? `
+                      <h3>Genetic Data</h3>
+                      <div class="plant-section">
+                          <p><strong>Gene Name:</strong> ${plant.genetic_data?.gene_name || 'N/A'}</p>
+                          <p><strong>Accession Number:</strong> <a href="https://www.ncbi.nlm.nih.gov/nuccore/${plant.genetic_data?.accession_number}" target="_blank">${plant.genetic_data?.accession_number || 'N/A'}</a></p>
+                          <p><strong>DNA Sequence (rbcL Gene):</strong></p>
+                          <div class="dna-sequence">${plant.genetic_data?.dna_sequence || 'N/A'}</div>
+                      </div>` : ''}
+
+                      <div id="protein-viewer-section" style="display: none;">
+                          <h3>3D Protein Structure</h3>
+                          <div class="plant-section">
+                              <p>Displaying 3D structure for <strong>${plant.protein_data?.protein_name || 'N/A'}</strong> (PDB ID: <strong><a href="https://www.rcsb.org/structure/${plant.protein_data?.pdb_id}" target="_blank">${plant.protein_data?.pdb_id || 'N/A'}</a></strong>).</p>
+                              <div id="molstar-container"></div>
+                          </div>
+                      </div>
+                  </div>
+              `;
+              
+              // Final step: Render the 3D viewer if a PDB ID exists
+              renderProteinViewer(plant.protein_data?.pdb_id);
+        }
+
+        document.getElementById('search-input').addEventListener('keypress', function(event) {
+             if (event.key === 'Enter') {
+                 event.preventDefault();
+                 searchPlant();
+             }
+        });
+        // Location-based search functionality
+        document.getElementById('location-search-btn').addEventListener('click', async function() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser');
+            return;
+        }
+
+        this.disabled = true;
+        this.textContent = '🔄 Detecting location...';
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                try {
+                    const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    const geoData = await geoResponse.json();
+                    const city = geoData.address.city || geoData.address.town || geoData.address.state_district || geoData.address.state || 'your location';
+
+                    await searchPlantsByLocation(city);
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    alert('Could not determine your location. Please try again.');
+                } finally {
+                    this.disabled = false;
+                    this.textContent = '🌍 Find Plants Near Me';
+                }
+            },
+            (error) => {
+                alert('Location access denied. Please enable location services and try again.');
+                this.disabled = false;
+                this.textContent = '🌍 Find Plants Near Me';
+            }
+        );
+    });
+
+    async function searchPlantsByLocation(location) {
+    const section = document.getElementById('location-results');
+    const titleEl = document.getElementById('location-results-title');
+    const listEl = document.getElementById('location-results-list');
+
+    // Update UI state
+    titleEl.textContent = `Medicinal Plants in ${location}`;
+    section.style.display = 'block';
+    listEl.innerHTML = '<p style="padding:10px;">Loading plants...</p>';
+
+    // Optionally keep featured slider visible or hide it:
+    // document.getElementById('featured-plants').style.display = 'none';
+    document.getElementById('main-welcome-area').style.display = 'none';
+    document.getElementById('quotes-section').style.display = 'none';
+
+    try {
+        const response = await fetch('http://127.0.0.1:5001/search-by-location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `location=${encodeURIComponent(location)}`
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to search plants');
+        }
+
+        // >>> THIS IS THE SNIPPET LOCATION <<<
+        const plants = data.plants || [];
+        const extra = data.recommendations || '';
+
+        if (!plants.length) {
+            listEl.innerHTML = '<p style="padding:10px;">No medicinal plants found for this location.</p>';
+            return;
+        }
+
+        // Build simple clickable name list
+        let html = '<ol style="padding-left:20px;">';
+        plants.forEach((plant) => {
+            const commonName = (plant.common_names && plant.common_names[0]) || plant.scientific_name || 'Unknown';
+            const scientificName = plant.scientific_name || '';
+            const safeCommon = encodeURIComponent(commonName);
+
+            html += `
+                <li style="margin-bottom:8px;">
+                    <a href="#" onclick="openLocationPlant('${safeCommon}'); return false;">
+                        <strong>${commonName}</strong>
+                        ${scientificName ? `<em> (${scientificName})</em>` : ''}
+                    </a>
+                </li>
+            `;
+        });
+        html += '</ol>';
+
+        // Append Groq recommendations if available
+        if (extra) {
+            html += `
+                <hr style="margin:24px 0;">
+                <h3 style="color:#2563EB;margin-bottom:8px;">Medicinal & Crop Recommendations</h3>
+                <div style="font-size:0.95em;color:#374151;line-height:1.6;">
+                    ${extra.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        }
+
+        listEl.innerHTML = html;
+
+    } catch (error) {
+        console.error('Error searching plants by location:', error);
+        listEl.innerHTML = `<p style="color:#b91c1c;">Error: ${error.message}</p>`;
+    }
+}
+
+async function openLocationPlant(encodedCommonName) {
+    const commonName = decodeURIComponent(encodedCommonName);
+
+    // This follows the same logic as your searchPlant() but only for one name
+    resultsMessageContainer.innerHTML = '';
+    searchLoader.style.display = 'block';
+    resultsMessageContainer.appendChild(searchLoader);
+
+    try {
+        const response = await fetch(`http://127.0.0.1:5001/search-plant?name=${encodeURIComponent(commonName)}`);
+        const data = await response.json();
+        searchLoader.style.display = 'none';
+
+        if (!response.ok) {
+            // Not in DB → show "details not available"
+            showPlantNotFoundMessage(commonName, '');
+            return;
+        }
+
+        // Use your existing detail renderer
+        displayPlantDetails(data);
+        detailsContainer.style.display = 'flex';
+        void detailsContainer.offsetWidth;
+        detailsContainer.classList.add('visible');
+        detailsContainer.style.maxHeight = '10000px';
+        setTimeout(() => {
+            detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+
+    } catch (error) {
+        searchLoader.style.display = 'none';
+        console.error('Error fetching plant details:', error);
+        showPlantNotFoundMessage(commonName, '');
+    }
+}
+
+
+function displayPlantsInSlider(plants) {
+    // Clear container and reset styling
+    plantSliderEl.innerHTML = '';
+    plantSliderEl.style.display = 'block';
+    plantSliderEl.style.gridTemplateColumns = '';
+    plantSliderEl.style.gap = '';
+    plantSliderEl.style.padding = '30px 50px';
+    plantSliderEl.style.maxWidth = '900px';
+    plantSliderEl.style.margin = '0 auto';
+    
+    if (!plants || plants.length === 0) {
+        plantSliderEl.innerHTML = '<p style="text-align:center; padding: 40px; color: #6B7280;">No medicinal plants found for this location.</p>';
+        return;
+    }
+    
+    // Create a simple numbered list
+    const listContainer = document.createElement('div');
+    listContainer.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 30px 40px;
+    `;
+    
+    const list = document.createElement('ol');
+    list.style.cssText = `
+        list-style: none;
+        counter-reset: plant-counter;
+        padding: 0;
+        margin: 0;
+    `;
+    
+    plants.forEach(plant => {
+        const commonName = plant.common_names && plant.common_names.length > 0 ? plant.common_names[0] : plant.scientific_name;
+        const scientificName = plant.scientific_name || '';
+        
+        const listItem = document.createElement('li');
+        listItem.style.cssText = `
+            counter-increment: plant-counter;
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #E5E7EB;
+            position: relative;
+            padding-left: 60px;
+        `;
+        
+        listItem.innerHTML = `
+            <span style="
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-weight: bold;
+                color: #3B82F6;
+                font-size: 1.2em;
+            ">${plants.indexOf(plant) + 1}.</span>
+            <div>
+                <strong style="color: #1F2937; font-size: 1.1em;">${commonName}</strong>
+                <br>
+                <em style="color: #6B7280; font-size: 0.95em;">${scientificName}</em>
+            </div>
+        `;
+        
+        // Hover effect
+        listItem.onmouseover = () => {
+            listItem.style.background = '#EFF6FF';
+            listItem.style.borderColor = '#3B82F6';
+            listItem.style.transform = 'translateX(5px)';
+        };
+        listItem.onmouseout = () => {
+            listItem.style.background = 'transparent';
+            listItem.style.borderColor = '#E5E7EB';
+            listItem.style.transform = 'translateX(0)';
+        };
+        
+        // Click handler
+        listItem.onclick = async () => {
+            console.log('Clicked on:', commonName);
+            
+            // Hide list and show loading
+            featuredContainer.style.display = 'none';
+            searchLoader.style.display = 'block';
+            resultsMessageContainer.innerHTML = '';
+            resultsMessageContainer.appendChild(searchLoader);
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:5001/search-plant?name=${encodeURIComponent(commonName)}`);
+                searchLoader.style.display = 'none';
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Plant details loaded');
+                    displayPlantDetails(data);
+                    detailsContainer.style.display = 'flex';
+                    void detailsContainer.offsetWidth;
+                    detailsContainer.classList.add('visible');
+                    detailsContainer.style.maxHeight = '10000px';
+                    setTimeout(() => {
+                        detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } else {
+                    console.log('Plant not in database');
+                    showPlantNotFoundMessage(commonName, scientificName);
+                }
+            } catch (error) {
+                searchLoader.style.display = 'none';
+                console.error('Error:', error);
+                showPlantNotFoundMessage(commonName, scientificName);
+            }
+        };
+        
+        list.appendChild(listItem);
+    });
+    
+    listContainer.appendChild(list);
+    plantSliderEl.appendChild(listContainer);
+    
+    // Destroy slider instance if exists
+    if (sliderInstance) {
+        sliderInstance.destroy();
+        sliderInstance = null;
+    }
+}
+
+function showPlantNotFoundMessage(commonName, scientificName) {
+    featuredContainer.style.display = 'none';
+    detailsContainer.innerHTML = `
+        <div style="text-align: center; padding: 60px 40px; width: 100%;">
+            <div style="font-size: 80px; margin-bottom: 25px;">🌿</div>
+            <h2 style="color: #3B82F6; margin-bottom: 15px; font-size: 2em;">${commonName || scientificName}</h2>
+            <p style="font-size: 1.2em; color: #6B7280; margin-bottom: 20px;">
+                <em>${scientificName || ''}</em>
+            </p>
+            <div style="background: #FEF3C7; border-left: 5px solid #F59E0B; padding: 25px; border-radius: 10px; margin: 35px auto; max-width: 650px; text-align: left;">
+                <p style="margin: 0 0 15px 0; color: #92400E; font-size: 1.1em;">
+                    ℹ️ <strong>Detailed information for this plant is not available in our database yet.</strong>
+                </p>
+                <p style="margin: 0; color: #92400E; font-size: 1em;">
+                    This plant is known to grow in your area. We're constantly updating our collection!
+                </p>
+            </div>
+            <button onclick="window.location.reload()" style="
+                background: #3B82F6;
+                color: white;
+                border: none;
+                padding: 14px 35px;
+                border-radius: 10px;
+                font-size: 1.05em;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 25px;
+                transition: background 0.3s;
+            " onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='#3B82F6'">
+                ← Back to Search
+            </button>
+        </div>
+    `;
+    detailsContainer.style.display = 'flex';
+    void detailsContainer.offsetWidth;
+    detailsContainer.classList.add('visible');
+    detailsContainer.style.maxHeight = '10000px';
+    setTimeout(() => {
+        detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+
+function showPlantNotFoundMessage(commonName, scientificName) {
+    featuredContainer.style.display = 'none';
+    detailsContainer.innerHTML = `
+        <div style="text-align: center; padding: 60px 40px; width: 100%;">
+            <div style="font-size: 80px; margin-bottom: 25px;">🌿</div>
+            <h2 style="color: #3B82F6; margin-bottom: 15px; font-size: 2em;">${commonName || scientificName}</h2>
+            <p style="font-size: 1.2em; color: #6B7280; margin-bottom: 20px;">
+                <em>${scientificName || ''}</em>
+            </p>
+            <div style="background: #FEF3C7; border-left: 5px solid #F59E0B; padding: 25px; border-radius: 10px; margin: 35px auto; max-width: 650px; text-align: left;">
+                <p style="margin: 0 0 15px 0; color: #92400E; font-size: 1.1em;">
+                    ℹ️ <strong>Plant details are not available in our database yet.</strong>
+                </p>
+                <p style="margin: 0; color: #92400E; font-size: 1em;">
+                    We're constantly updating our collection. This plant is known to grow in your area according to our AI search!
+                </p>
+            </div>
+            <button onclick="window.location.reload()" style="
+                background: #3B82F6;
+                color: white;
+                border: none;
+                padding: 14px 35px;
+                border-radius: 10px;
+                font-size: 1.05em;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 25px;
+                transition: background 0.3s;
+            " onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='#3B82F6'">
+                ← Back to Search
+            </button>
+        </div>
+    `;
+    detailsContainer.style.display = 'flex';
+    void detailsContainer.offsetWidth;
+    detailsContainer.classList.add('visible');
+    detailsContainer.style.maxHeight = '10000px';
+    setTimeout(() => {
+        detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+
+function showPlantNotFoundMessage(commonName, scientificName) {
+    detailsContainer.innerHTML = `
+        <div style="text-align: center; padding: 60px 40px; width: 100%;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🌿</div>
+            <h2 style="color: #3B82F6; margin-bottom: 15px;">${commonName || scientificName}</h2>
+            <p style="font-size: 1.1em; color: #6B7280; margin-bottom: 10px;">
+                <em>${scientificName || ''}</em>
+            </p>
+            <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; border-radius: 8px; margin: 30px auto; max-width: 600px;">
+                <p style="margin: 0; color: #92400E; font-size: 1.05em;">
+                    ℹ️ <strong>Plant details are not available in our database yet.</strong>
+                </p>
+                <p style="margin: 10px 0 0 0; color: #92400E;">
+                    We're constantly updating our collection. This plant is known to grow in your area!
+                </p>
+            </div>
+            <button onclick="window.location.reload()" style="
+                background: #3B82F6;
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 8px;
+                font-size: 1em;
+                cursor: pointer;
+                margin-top: 20px;
+            ">← Back to Search</button>
+        </div>
+    `;
+    detailsContainer.style.display = 'flex';
+    void detailsContainer.offsetWidth;
+    detailsContainer.classList.add('visible');
+    detailsContainer.style.maxHeight = '10000px';
+    setTimeout(() => {
+        detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+    </script>
+</body>
+</html>

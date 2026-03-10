@@ -1,0 +1,153 @@
+body { 
+    font-family: 'NOTO SANS', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #00242c; /* Main background color */
+    color: white;
+}
+
+header {
+    background: linear-gradient(to bottom, #004f4f, #003636);
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin: 0;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+nav a {
+    color: #2dec7c; /* Accent color */
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 20px;
+    background-color: #00242c; /* Maintain main background */
+}
+
+.model-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    background: #004f4f;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.model-container model-viewer {
+    width: 100%;
+    max-width: 500px;
+    height: 500px;
+    margin: 2px;
+}
+
+.plant-info {
+    max-width: 400px;
+    text-align: left;
+    margin: 10px;
+    color: #ffffff; /* Accent text color */
+}
+
+.plant-info img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.plant-info h3 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+.plant-info p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+
+.plant-info .learn-more {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #2dec7c; /* Accent color */
+    color: #00242c; /* Dark background */
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.plant-info .learn-more:hover {
+    background-color: #29c76d; /* Slightly darker accent */
+}
+
+input[type="text"] {
+    padding: 10px;
+    margin-right: 10px;
+    width: 80%;
+    max-width: 300px;
+    border-radius: 5px;
+    border: 1px solid #2dec7c; /* Accent border */
+    background-color: #003636;
+    color: white;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #2dec7c; /* Accent color */
+    color: #00242c; /* Dark background */
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #29c76d; /* Slightly darker accent */
+}
+
+footer {
+    background: linear-gradient(to bottom, #004f4f, #00242c);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 20px;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#search-results {
+    margin-top: 10px;
+}
+
+/* Responsive Design */
+/*@media (max-width: 500px) {
+    .model-container {
+        flex-direction: column;
+        background-color: #004f4f;
+    }
+
+    .plant-info {
+        text-align: center;
+        margin-left: 0;
+    }
+
+    .model-container model-viewer {
+        max-width: 100%;
+        height: auto;
+        margin: 2px 0;
+    }
+}
